@@ -3,8 +3,8 @@ import pandas as pd
 import altair as alt
 
 
-@st.cache
-def load_data():
+@st.cache # add caching so we load the data only once
+def load_data(): # Load the airbnb data acquired from InsideAirbnb.com
     DC202009 = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/listings.csv"
     reviews = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/reviews.csv"
 
@@ -52,10 +52,14 @@ if __name__ == "__main__":
     chart1_data.columns = ['count']
     chart1_data.reset_index(inplace=True)
 
-    st.write(alt.Chart(chart1_data).mark_line().encode(
+    reviewsPlot = alt.Chart(chart1_data).mark_line().encode(
         x='month',
         y='count'
-    ))
+    ).properties(
+        width=600, height=400
+    ).interactive()
+
+    st.write(reviewsPlot)
 
     st.write("We can observe a clear decline from February to April, which was around the time when the pandemic"
              " was at it's peak. The drastic dip shows just how much of an effect COVID-19 had on the number of"
