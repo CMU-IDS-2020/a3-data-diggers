@@ -9,6 +9,7 @@ def load_data(): # Load the airbnb data acquired from InsideAirbnb.com
     reviews = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/reviews.csv"
 
     df_reviews = pd.read_csv(reviews)
+
     # Calculating + appending month and year to the reviews dataframe
     df_reviews["month"] = df_reviews.apply(lambda row: getMonth(row["date"]), axis=1)
     df_reviews["year"] = df_reviews.apply(lambda row: getYear(row["date"]), axis=1)
