@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import math
 import altair as alt
 
 
@@ -62,6 +63,7 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     # Removing dollar from price, removing nan
     for key in WDC_listings.keys():
         ldf = WDC_listings[key]
+        ldf["price"] = ldf["price"].fillna(0)
         ldf["price"] = ldf.apply(lambda row: remove_dollar(row["price"]), axis=1)
         ldf["price"] = pd.to_numeric(ldf["price"])
         WDC_listings[key] = ldf
@@ -139,9 +141,36 @@ if __name__ == "__main__":
 
         filtered_listings[month_no] = df_filter
 
-    # OLD: Get median price, no_of reviews
+    # Get median price, no_of reviews
+    median_price = []
+    number_of_listings = []
+    month = []
+    for fl in filtered_listings.keys():
+        fl_df = filtered_listings[fl]
+        month.append(fl)
+        fl_median = fl_df['price'].median()
 
-    # # chart
+        if math.isnan(fl_median):
+            fl_median = 0
+        median_price.append(fl_median)
+        # median_price becomes nan when the dataframe is empty
+        fl_listings = len(fl_df.axes[0])
+        number_of_listings.append(fl_listings)
+
+    graphing_dict = {"month": month, "median price": median_price, "number of listings": number_of_listings}
+    graphing_df = pd.DataFrame.from_dict(graphing_dict)
+
+    st.write("The dataframe shown below consists of aggregate statistics from the filtered dataframes above:")
+    st.write(graphing_df)
+
+    one_listing_data = []
+    selected_listing_id = st.text_input("Please enter the listing ID you want details for", 93551)
+    for fl in filtered_listings.keys():
+        fl_df_1 = filtered_listings[fl]
+        st.write(fl_df_1[(fl_df_1["id"] == int(selected_listing_id))])
+
+
+    # # OLD: chart
     #
     # # Monthly trends in terms of number of reviews (Could be changed to slider input)
     # user_input_year = st.text_input("Please enter a year to view monthly trends for that year", "2020")
