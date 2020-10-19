@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import math
 import altair as alt
+import numpy as np
 
 st.beta_set_page_config(layout="wide")
+
 
 # Function to remove dollar from price (TBD - move to cleaning later)
 def remove_dollar(price):
@@ -15,8 +17,8 @@ def get_month(date):
     separator = "/"
     if date.__contains__('-'):
         separator = '-'
-    month = str(date).split(separator)[1]
-    return month
+    month_x = str(date).split(separator)[0]
+    return month_x
 
 
 # Function to add year to the dataframe
@@ -24,7 +26,7 @@ def get_year(date):
     separator = "/"
     if date.__contains__('-'):
         separator = '-'
-    year = str(date).split(separator)[0]
+    year = str(date).split(separator)[2]
     return year
 
 
@@ -43,7 +45,8 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     #                 '09': pd.read_csv(root_path + '2020/WDC/listings_09.csv')}
 
     # Local
-    root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
+    # root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
+    root_path = "/Users/shravya/Documents/CMU/Interactive_Data_Science/Assignments/3/Code2/data/"
     reviews = {'WDC': pd.read_csv(root_path + 'WDC_reviews.csv')}
     WDC_listings = {'01': pd.read_csv(root_path + '2020/WDC/listings_01.csv'),
                     '02': pd.read_csv(root_path + '2020/WDC/listings_02.csv'),
@@ -78,22 +81,18 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
 if __name__ == "__main__":
     reviews_dictionary, WDC_listings_dictionary = load_data()
 
+    month_number_mapping = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May",
+                            "06": "June", "07": "July", "08": "August", "09": "September", "10": "October",
+                            "11": "November", "12": "December"}
+
     # city to listings dictionary mapping
     city_listings_mapping = {"Washington DC": WDC_listings_dictionary}
-
     # neighbourhood_mapping TBD
-    city_neighbourhood_mapping = {"Washington DC": ['Shaw', 'Capitol Hill', 'Columbia Heights'],
-                                  "Austin, Texas": ['N1', 'N2']}
-
-    # property_types = ['Townhouse', 'House', 'Other', 'Apartment', 'Guest suite', 'Loft', 'Bed and breakfast',
-    #                   'Barn', 'Condominium', 'Bungalow', 'Guesthouse', 'Serviced apartment', 'Boat', 'Hostel',
-    #                   'Tiny house', 'Boutique hotel', 'Resort', 'Aparthotel', 'Villa', 'Cottage', 'Camper/RV', 'Hotel']
-    
-    room_types = ['Entire room/apt', 'Private room', 'Shared room', 'Hotel room']
-
+    city_neighbourhood_mapping = {"Washington DC": ['All', 'Shaw', 'Capitol Hill', 'Columbia Heights',
+                                                    'U Street Corridor']}
+    room_types = ['All', 'Entire home/apt', 'Private room', 'Shared room', 'Hotel room']
     years = ["2015", "2016", "2017", "2018", "2019", "2020"]
-
-    rental_size = ["Studio", "1", "2", "3", "4", "5+"]
+    rental_size = ["All", "Studio", "1", "2", "3", "4", "5+"]
 
     # DISPLAY STARTS HERE
     st.title("To List or Not To List: A COVID-19 Edition")
@@ -102,18 +101,14 @@ if __name__ == "__main__":
         Interactive Data Science Fall 2020 | Assignment 3 | Carnegie Mellon University
         '''
                 )
-    st.header("Search Criteria")
 
     # Select City
-    cities = ["Washington DC", "Austin, Texas"]
+    cities = ["Washington DC"]
     city = st.sidebar.selectbox("City", cities)
 
     # Get unique neighbourhoods
     unique_neighbourhoods = city_neighbourhood_mapping[city]
     neighbourhood = st.sidebar.selectbox("Neighbourhood", unique_neighbourhoods)
-
-    # # Select property type
-    # type_property = st.sidebar.selectbox("Property Type", property_types)
 
     # Select room type
     type_room = st.sidebar.selectbox("Room Type", room_types)
@@ -123,12 +118,13 @@ if __name__ == "__main__":
 
     # Select rental size
     size_rental = st.sidebar.select_slider("Rental Size", rental_size)
-    size_rental_internal = 0 if size_rental == 'Studio' else int(size_rental.replace('+', ''))
-    st.write(size_rental_internal)
+    size_rental_internal = None
+    if size_rental != 'All':
+        size_rental_internal = 0 if size_rental == 'Studio' else int(size_rental.replace('+', ''))
 
     # Select price range
-    min_price = st.sidebar.slider("Minimum Property Price", 0, 10000, 50, 50, format="$%d")
-    max_price = st.sidebar.slider("Maximum Property Price", 0, 10000, 200, 50, format="$%d")
+    min_price = st.sidebar.slider("Minimum Property Price", 0, 10000, 0, 500, format="$%d")
+    max_price = st.sidebar.slider("Maximum Property Price", 0, 10000, 10000, 500, format="$%d")
 
     # Get the filtered dataframe based on the above criteria
     listings_dict = city_listings_mapping[city]
@@ -136,19 +132,28 @@ if __name__ == "__main__":
     filtered_listings = {}
     for month_no in listings_dict.keys():
         df = listings_dict[month_no]
-
         # host_neighbourhood to be changed to neighbourhood later
-        df_filter = df[(df["host_neighbourhood"] == neighbourhood)
-                    #    & (df["property_type"] == type_property)
-                       & (df["room_type"] == type_room)
-                       & (df["bedrooms"] == size_rental_internal)
-                       & (df["price"] <= max_price) & (df["price"] >= min_price)]
-
-        st.write(df_filter)
-
+        df_filter = df
+        if neighbourhood != 'All':
+            df_filter = df[(df["host_neighbourhood"] == neighbourhood)]
+        if type_room != 'All':
+            df_filter = df_filter[(df_filter["room_type"] == type_room)]
+        if size_rental_internal is not None:
+            df_filter = df_filter[(df["bedrooms"] == size_rental_internal)]
+        df_filter = df_filter[(df["price"] <= max_price) & (df["price"] >= min_price)]
         filtered_listings[month_no] = df_filter
 
-    st.map(df)
+    # Combine all filtered listings into one dataframe
+    all_filtered_listings = pd.concat([filtered_listings['02'], filtered_listings['03'],
+                                       filtered_listings['04'], filtered_listings['05'],
+                                       filtered_listings['06'], filtered_listings['08'],
+                                       filtered_listings['09']], ignore_index=True)
+    all_filtered_listings.drop_duplicates(subset=['id'], inplace=True, keep='last')
+    # Get total number of filtered listings
+    total_filtered_listings = len(all_filtered_listings.axes[0])
+    st.write("Number of listings: " + str(total_filtered_listings))
+    # Showing map with all the filtered listings
+    st.map(all_filtered_listings)
 
     # Get median price, no_of reviews
     median_price = []
@@ -169,14 +174,48 @@ if __name__ == "__main__":
     graphing_dict = {"month": month, "median price": median_price, "number of listings": number_of_listings}
     graphing_df = pd.DataFrame.from_dict(graphing_dict)
 
-    st.write("The dataframe shown below consists of aggregate statistics from the filtered dataframes above:")
-    st.write(graphing_df)
+    # View 2
+    view2 = alt.Chart(graphing_df).mark_line().encode(
+            x='month',
+            y='median price'
+        ).properties(
+            width=600, height=400
+        ).interactive()
+
+    st.write(view2)
+
+    # View 3
+    # Get unique listing IDs from all_filtered_listings
+    listing_id_list = all_filtered_listings['id'].tolist()
+    reviews_city = reviews_dictionary['WDC']
+    df_reviews_year = reviews_city[(reviews_city["year"] == '20')]
+    df_reviews_year = df_reviews_year[(df_reviews_year["listing_id"].isin(listing_id_list))]
+    reviews_chart = pd.DataFrame(df_reviews_year.groupby(['month'])['month'].count())
+    reviews_chart.columns = ['count']
+    reviews_chart.reset_index(inplace=True)
+    view3 = alt.Chart(reviews_chart).mark_line().encode(
+         x='month',
+         y='count'
+    ).properties(
+         width=600, height=400
+    ).interactive()
+
+    st.write(view3)
+
+    # View 4
+    view4 = alt.Chart(graphing_df).mark_line().encode(
+        x='month',
+        y='number of listings'
+    ).properties(
+        width=600, height=400
+    ).interactive()
+
+    st.write(view4)
 
     one_listing_data = []
     selected_listing_id = st.text_input("Please enter the listing ID you want details for", 93551)
     for fl in filtered_listings.keys():
         fl_df_1 = filtered_listings[fl]
-        st.write(fl_df_1[(fl_df_1["id"] == int(selected_listing_id))])
 
 
 

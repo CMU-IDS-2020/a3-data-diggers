@@ -1,3 +1,5 @@
-streamlit
-pandas
-altair
+streamlit~=0.68.1
+pandas~=1.1.1
+altair~=4.1.0
+
+numpy~=1.19.1
