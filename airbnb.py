@@ -3,6 +3,7 @@ import pandas as pd
 import math
 import altair as alt
 
+st.beta_set_page_config(layout="wide")
 
 # Function to remove dollar from price (TBD - move to cleaning later)
 def remove_dollar(price):
@@ -42,7 +43,7 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     #                 '09': pd.read_csv(root_path + '2020/WDC/listings_09.csv')}
 
     # Local
-    root_path = "/Users/shravya/Documents/CMU/Interactive_Data_Science/Assignments/3/Code2/data/"
+    root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
     reviews = {'WDC': pd.read_csv(root_path + 'WDC_reviews.csv')}
     WDC_listings = {'01': pd.read_csv(root_path + '2020/WDC/listings_01.csv'),
                     '02': pd.read_csv(root_path + '2020/WDC/listings_02.csv'),
@@ -84,9 +85,11 @@ if __name__ == "__main__":
     city_neighbourhood_mapping = {"Washington DC": ['Shaw', 'Capitol Hill', 'Columbia Heights'],
                                   "Austin, Texas": ['N1', 'N2']}
 
-    property_types = ['Townhouse', 'House', 'Other', 'Apartment', 'Guest suite', 'Loft', 'Bed and breakfast',
-                      'Barn', 'Condominium', 'Bungalow', 'Guesthouse', 'Serviced apartment', 'Boat', 'Hostel',
-                      'Tiny house', 'Boutique hotel', 'Resort', 'Aparthotel', 'Villa', 'Cottage', 'Camper/RV', 'Hotel']
+    # property_types = ['Townhouse', 'House', 'Other', 'Apartment', 'Guest suite', 'Loft', 'Bed and breakfast',
+    #                   'Barn', 'Condominium', 'Bungalow', 'Guesthouse', 'Serviced apartment', 'Boat', 'Hostel',
+    #                   'Tiny house', 'Boutique hotel', 'Resort', 'Aparthotel', 'Villa', 'Cottage', 'Camper/RV', 'Hotel']
+    
+    room_types = ['Entire room/apt', 'Private room', 'Shared room', 'Hotel room']
 
     years = ["2015", "2016", "2017", "2018", "2019", "2020"]
 
@@ -103,26 +106,29 @@ if __name__ == "__main__":
 
     # Select City
     cities = ["Washington DC", "Austin, Texas"]
-    city = st.selectbox("City", cities)
+    city = st.sidebar.selectbox("City", cities)
 
     # Get unique neighbourhoods
     unique_neighbourhoods = city_neighbourhood_mapping[city]
-    neighbourhood = st.selectbox("Neighbourhood", unique_neighbourhoods)
+    neighbourhood = st.sidebar.selectbox("Neighbourhood", unique_neighbourhoods)
 
-    # Select property type
-    type_property = st.selectbox("Property Type", property_types)
+    # # Select property type
+    # type_property = st.sidebar.selectbox("Property Type", property_types)
+
+    # Select room type
+    type_room = st.sidebar.selectbox("Room Type", room_types)
 
     # Select year
-    selected_year = st.selectbox("Year", years, index=5)
+    selected_year = st.sidebar.selectbox("Year", years, index=5)
 
     # Select rental size
-    size_rental = st.select_slider("Rental Size", rental_size)
+    size_rental = st.sidebar.select_slider("Rental Size", rental_size)
     size_rental_internal = 0 if size_rental == 'Studio' else int(size_rental.replace('+', ''))
     st.write(size_rental_internal)
 
     # Select price range
-    min_price = st.slider("Minimum Property Price", 0, 10000, 50, 50, format="$%d")
-    max_price = st.slider("Maximum Property Price", 0, 10000, 200, 50, format="$%d")
+    min_price = st.sidebar.slider("Minimum Property Price", 0, 10000, 50, 50, format="$%d")
+    max_price = st.sidebar.slider("Maximum Property Price", 0, 10000, 200, 50, format="$%d")
 
     # Get the filtered dataframe based on the above criteria
     listings_dict = city_listings_mapping[city]
@@ -133,13 +139,16 @@ if __name__ == "__main__":
 
         # host_neighbourhood to be changed to neighbourhood later
         df_filter = df[(df["host_neighbourhood"] == neighbourhood)
-                       & (df["property_type"] == type_property)
+                    #    & (df["property_type"] == type_property)
+                       & (df["room_type"] == type_room)
                        & (df["bedrooms"] == size_rental_internal)
                        & (df["price"] <= max_price) & (df["price"] >= min_price)]
 
         st.write(df_filter)
 
         filtered_listings[month_no] = df_filter
+
+    st.map(df)
 
     # Get median price, no_of reviews
     median_price = []
@@ -168,6 +177,7 @@ if __name__ == "__main__":
     for fl in filtered_listings.keys():
         fl_df_1 = filtered_listings[fl]
         st.write(fl_df_1[(fl_df_1["id"] == int(selected_listing_id))])
+
 
 
     # # OLD: chart
