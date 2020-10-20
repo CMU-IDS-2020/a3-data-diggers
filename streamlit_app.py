@@ -45,17 +45,17 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     #                 '09': pd.read_csv(root_path + '2020/WDC/listings_09.csv')}
 
     # Local
-    # root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
-    root_path = "/Users/shravya/Documents/CMU/Interactive_Data_Science/Assignments/3/Code2/data/"
-    reviews = {'WDC': pd.read_csv(root_path + 'WDC_reviews.csv')}
-    WDC_listings = {'01': pd.read_csv(root_path + '2020/WDC/listings_01.csv'),
-                    '02': pd.read_csv(root_path + '2020/WDC/listings_02.csv'),
-                    '03': pd.read_csv(root_path + '2020/WDC/listings_03.csv'),
-                    '04': pd.read_csv(root_path + '2020/WDC/listings_04.csv'),
-                    '05': pd.read_csv(root_path + '2020/WDC/listings_05.csv'),
-                    '06': pd.read_csv(root_path + '2020/WDC/listings_06.csv'),
-                    '08': pd.read_csv(root_path + '2020/WDC/listings_08.csv'),
-                    '09': pd.read_csv(root_path + '2020/WDC/listings_09.csv')}
+    root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
+    # root_path = "/Users/shravya/Documents/CMU/Interactive_Data_Science/Assignments/3/Code2/data/"
+    reviews = {'NYC': pd.read_csv(root_path + 'NYC_reviews.csv')}
+    NYC_listings = {'01': pd.read_csv(root_path + '2020/NYC/listings_01.csv'),
+                    '02': pd.read_csv(root_path + '2020/NYC/listings_02.csv'),
+                    '03': pd.read_csv(root_path + '2020/NYC/listings_03.csv'),
+                    '04': pd.read_csv(root_path + '2020/NYC/listings_04.csv'),
+                    '05': pd.read_csv(root_path + '2020/NYC/listings_05.csv'),
+                    '06': pd.read_csv(root_path + '2020/NYC/listings_06.csv'),
+                    '08': pd.read_csv(root_path + '2020/NYC/listings_08.csv'),
+                    '09': pd.read_csv(root_path + '2020/NYC/listings_09.csv')}
 
     # Calculating + appending month and year to the reviews dataframe
     for key in reviews.keys():
@@ -65,31 +65,31 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
         reviews[key] = rdf
 
     # Removing dollar from price, removing nan
-    for key in WDC_listings.keys():
-        ldf = WDC_listings[key]
+    for key in NYC_listings.keys():
+        ldf = NYC_listings[key]
         ldf["price"] = ldf["price"].fillna(0)
         ldf["price"] = ldf.apply(lambda row: remove_dollar(row["price"]), axis=1)
         ldf["price"] = pd.to_numeric(ldf["price"])
-        WDC_listings[key] = ldf
-        ldf['host_neighbourhood'] = ldf['host_neighbourhood'].fillna("other")
-        ldf['property_type'] = ldf['property_type'].fillna("other")
+        NYC_listings[key] = ldf
+        ldf['neighbourhood_group_cleansed'] = ldf['neighbourhood_group_cleansed'].fillna("other")
+        ldf['room_type'] = ldf['room_type'].fillna("other")
         ldf['bedrooms'] = ldf['bedrooms'].fillna(0)
 
-    return reviews, WDC_listings
+    return reviews, NYC_listings
 
 
 if __name__ == "__main__":
-    reviews_dictionary, WDC_listings_dictionary = load_data()
+    reviews_dictionary, NYC_listings_dictionary = load_data()
 
     month_number_mapping = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May",
                             "06": "June", "07": "July", "08": "August", "09": "September", "10": "October",
                             "11": "November", "12": "December"}
 
     # city to listings dictionary mapping
-    city_listings_mapping = {"Washington DC": WDC_listings_dictionary}
+    city_listings_mapping = {"New York City": NYC_listings_dictionary}
     # neighbourhood_mapping TBD
-    city_neighbourhood_mapping = {"Washington DC": ['All', 'Shaw', 'Capitol Hill', 'Columbia Heights',
-                                                    'U Street Corridor']}
+    city_neighbourhood_mapping = {"New York City": ['All', 'Brooklyn', 'Manhattan', 'Queens',
+                                                    'Bronx', 'Staten Island']}
     room_types = ['All', 'Entire home/apt', 'Private room', 'Shared room', 'Hotel room']
     years = ["2015", "2016", "2017", "2018", "2019", "2020"]
     rental_size = ["All", "Studio", "1", "2", "3", "4", "5+"]
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                 )
 
     # Select City
-    cities = ["Washington DC"]
+    cities = ["New York City"]
     city = st.sidebar.selectbox("City", cities)
 
     # Get unique neighbourhoods
@@ -123,8 +123,8 @@ if __name__ == "__main__":
         size_rental_internal = 0 if size_rental == 'Studio' else int(size_rental.replace('+', ''))
 
     # Select price range
-    min_price = st.sidebar.slider("Minimum Property Price", 0, 10000, 0, 500, format="$%d")
-    max_price = st.sidebar.slider("Maximum Property Price", 0, 10000, 10000, 500, format="$%d")
+    min_price = st.sidebar.slider("Minimum Price", 0, 10000, 0, 500, format="$%d")
+    max_price = st.sidebar.slider("Maximum Price", 0, 10000, 10000, 500, format="$%d")
 
     # Get the filtered dataframe based on the above criteria
     listings_dict = city_listings_mapping[city]
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         # host_neighbourhood to be changed to neighbourhood later
         df_filter = df
         if neighbourhood != 'All':
-            df_filter = df[(df["host_neighbourhood"] == neighbourhood)]
+            df_filter = df[(df["neighbourhood_group_cleansed"] == neighbourhood)]
         if type_room != 'All':
             df_filter = df_filter[(df_filter["room_type"] == type_room)]
         if size_rental_internal is not None:
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     # View 3
     # Get unique listing IDs from all_filtered_listings
     listing_id_list = all_filtered_listings['id'].tolist()
-    reviews_city = reviews_dictionary['WDC']
+    reviews_city = reviews_dictionary['NYC']
     df_reviews_year = reviews_city[(reviews_city["year"] == '20')]
     df_reviews_year = df_reviews_year[(df_reviews_year["listing_id"].isin(listing_id_list))]
     reviews_chart = pd.DataFrame(df_reviews_year.groupby(['month'])['month'].count())
