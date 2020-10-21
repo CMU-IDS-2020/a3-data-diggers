@@ -3,6 +3,7 @@ import pandas as pd
 import math
 import altair as alt
 import numpy as np
+import pydeck as pdk
 
 st.beta_set_page_config(layout="wide")
 
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     city_neighbourhood_mapping = {"New York City": ['All', 'Brooklyn', 'Manhattan', 'Queens',
                                                     'Bronx', 'Staten Island']}
     room_types = ['All', 'Entire home/apt', 'Private room', 'Shared room', 'Hotel room']
-    years = ["2015", "2016", "2017", "2018", "2019", "2020"]
+    # years = ["2015", "2016", "2017", "2018", "2019", "2020"]
     rental_size = ["All", "Studio", "1", "2", "3", "4", "5+"]
 
     # DISPLAY STARTS HERE
@@ -108,13 +109,13 @@ if __name__ == "__main__":
 
     # Get unique neighbourhoods
     unique_neighbourhoods = city_neighbourhood_mapping[city]
-    neighbourhood = st.sidebar.selectbox("Neighbourhood", unique_neighbourhoods)
+    neighbourhood = st.sidebar.selectbox("Borough", unique_neighbourhoods)
 
     # Select room type
     type_room = st.sidebar.selectbox("Room Type", room_types)
 
     # Select year
-    selected_year = st.sidebar.selectbox("Year", years, index=5)
+    # selected_year = st.sidebar.selectbox("Year", years, index=5)
 
     # Select rental size
     size_rental = st.sidebar.select_slider("Rental Size", rental_size)
@@ -132,7 +133,6 @@ if __name__ == "__main__":
     filtered_listings = {}
     for month_no in listings_dict.keys():
         df = listings_dict[month_no]
-        # host_neighbourhood to be changed to neighbourhood later
         df_filter = df
         if neighbourhood != 'All':
             df_filter = df[(df["neighbourhood_group_cleansed"] == neighbourhood)]
@@ -212,37 +212,7 @@ if __name__ == "__main__":
 
     st.write(view4)
 
-    one_listing_data = []
-    selected_listing_id = st.text_input("Please enter the listing ID you want details for", 93551)
-    for fl in filtered_listings.keys():
-        fl_df_1 = filtered_listings[fl]
-
-
-
-    # # OLD: chart
-    #
-    # # Monthly trends in terms of number of reviews (Could be changed to slider input)
-    # user_input_year = st.text_input("Please enter a year to view monthly trends for that year", "2020")
-    # # Get subset of the dataframe for user_input_year
-    # df_reviews_year = df_reviews[(df_reviews["year"] == user_input_year)]
-    #
-    # chart1_data = pd.DataFrame(df_reviews_year.groupby(['month'])['month'].count())
-    # chart1_data.columns = ['count']
-    # chart1_data.reset_index(inplace=True)
-    #
-    # reviewsPlot = alt.Chart(chart1_data).mark_line().encode(
-    #     x='month',
-    #     y='count'
-    # ).properties(
-    #     width=600, height=400
-    # ).interactive()
-    #
-    # st.write(reviewsPlot)
-    #
-    # st.write("We can observe a clear decline from February to April, which was around the time when the pandemic"
-    #          " was at it's peak. The drastic dip shows just how much of an effect COVID-19 had on the number of"
-    #          " people staying in an Airbnb. \n If we look at previous years, there is an increase in reviews during"
-    #          " February, March and April, indicating that it is a time people usually travel. The curves of 2017, "
-    #          " 2018, and 2019 look similar, as do 2014 - 2016. Every couple of years, the curve changes slightly, "
-    #          " but 2020 is drastically different. \n Let's look at the data from 2020 in more detail.")
-    #
+    # one_listing_data = []
+    # selected_listing_id = st.text_input("Please enter the listing ID you want details for", 93551)
+    # for fl in filtered_listings.keys():
+    #     fl_df_1 = filtered_listings[fl]
