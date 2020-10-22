@@ -53,32 +53,6 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
                     '08': pd.read_csv(root_path + '2020/NYC/listings_08.csv'),
                     '09': pd.read_csv(root_path + '2020/NYC/listings_09.csv')}
 
-    MAP_NYC_listings = {'01': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_01.csv",
-                    '02': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_02.csv",
-                    '03': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_03.csv",
-                    '04': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_04.csv",
-                    '05': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_05.csv",
-                    '06': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_06.csv",
-                    '07': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_07.csv",
-                    '08': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_08.csv",
-                    '09': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_09.csv"}
-
-    # Local
-    # root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
-    # root_path = "/Users/shravya/Documents/CMU/Interactive_Data_Science/Assignments/3/Code2/data/"
-    # reviews = {'NYC': pd.read_csv(root_path + 'NYC_reviews.csv')}
-    # NYC_listings = {'01': pd.read_csv(root_path + '2020/NYC/listings_01.csv'),
-    #                 '02': pd.read_csv(root_path + '2020/NYC/listings_02.csv'),
-    #                 '03': pd.read_csv(root_path + '2020/NYC/listings_03.csv'),
-    #                 '04': pd.read_csv(root_path + '2020/NYC/listings_04.csv'),
-    #                 '05': pd.read_csv(root_path + '2020/NYC/listings_05.csv'),
-    #                 '06': pd.read_csv(root_path + '2020/NYC/listings_06.csv'),
-    #                 '07': pd.read_csv(root_path + '2020/NYC/listings_07.csv'),
-    #                 '08': pd.read_csv(root_path + '2020/NYC/listings_08.csv'),
-    #                 '09': pd.read_csv(root_path + '2020/NYC/listings_09.csv')}
-
-    map_data = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_09.csv"
-
     # Calculating + appending month and year to the reviews dataframe
     for key in reviews.keys():
         rdf = reviews[key]
@@ -102,11 +76,11 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
 
     covid_source = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/COVID/covid_data_cleaned_09.csv"
 
-    return reviews, NYC_listings, covid_data, map_data, MAP_NYC_listings, covid_source
+    return reviews, NYC_listings, covid_data, covid_source
 
 
 if __name__ == "__main__":
-    reviews_dictionary, NYC_listings_dictionary, covid, map_1, MAP_NYC_listings, covid_map = load_data()
+    reviews_dictionary, NYC_listings_dictionary, covid, covid_map = load_data()
 
     month_number_mapping = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May",
                             "06": "June", "07": "July", "08": "August", "09": "September", "10": "October",
@@ -181,30 +155,19 @@ if __name__ == "__main__":
         filtered_covid = covid['09'][(covid['09']['BOROUGH_GROUP'] == neighbourhood)]
 
     # Showing map with listings by month
-    # st.map(all_filtered_listings)
-    # all_filtered_listings.dropna(subset=['latitude', 'longitude'])
-    # all_filtered_listings['latitude'] = pd.to_numeric(all_filtered_listings['latitude'])
-    # all_filtered_listings['longitude'] = pd.to_numeric(all_filtered_listings['longitude'])
     selected_month = st.select_slider("Months in 2020", ['01', '02', '03', '04', '05', '06', '07', '08', '09'], '09')
-    dataset_map = filtered_listings[selected_month]
-    dataset_map.dropna(subset=['latitude', 'longitude'])
-    # dataset_map['latitude'] = pd.to_numeric(dataset_map['latitude'])
-    # dataset_map['longitude'] = pd.to_numeric(dataset_map['longitude'])
-
-    left_column, right_column = st.beta_columns(2)
-    left_column.write("Filtered Listings for " + month_number_mapping[selected_month])
-    left_column.map(dataset_map)
-    right_column.write("All Listings for " + month_number_mapping[selected_month])
-    map_data = MAP_NYC_listings[selected_month]
+    st.write("Filtered Listings for " + month_number_mapping[selected_month])
 
     map_data = filtered_listings[selected_month]
     map_data = map_data.dropna()
+    default_latitude = map_data['latitude'].mean()
+    default_longitude = map_data['longitude'].mean()
     if selected_month == '09':
-        right_column.pydeck_chart(pdk.Deck(
+        st.pydeck_chart(pdk.Deck(
             map_style='mapbox://styles/mapbox/light-v9',
             initial_view_state=pdk.ViewState(
-                latitude=40.7128,
-                longitude=-74.0060,
+                latitude=default_latitude,
+                longitude=default_longitude,
                 bearing=0,
                 zoom=11,
                 pitch=0,
@@ -232,7 +195,6 @@ if __name__ == "__main__":
                     ],
                     get_position='[longitude, latitude]',
                     get_weight=2,
-                    # get_position='[lon, lat]',
                     # radius=200,
                     # elevation_scale=4,
                     # elevation_range=[0, 1000],
@@ -266,11 +228,11 @@ if __name__ == "__main__":
             },
         ))
     else:
-        right_column.pydeck_chart(pdk.Deck(
+        st.pydeck_chart(pdk.Deck(
             map_style='mapbox://styles/mapbox/light-v9',
             initial_view_state=pdk.ViewState(
-                latitude=40.7128,
-                longitude=-74.0060,
+                latitude=default_latitude,
+                longitude=default_longitude,
                 bearing=0,
                 zoom=11,
                 pitch=0,
@@ -302,30 +264,6 @@ if __name__ == "__main__":
                 # "style": {"color": "white"},
             },
         ))
-
-
-    # st.pydeck_chart(pdk.Deck(
-    #     map_style='mapbox://styles/mapbox/light-v9',
-    #     layers=[
-    #         pdk.Layer(
-    #             'HexagonLayer',
-    #             data=dataset_map,
-    #             get_position='[longitude, latitude]',
-    #             radius=200,
-    #             elevation_scale=4,
-    #             elevation_range=[0, 1000],
-    #             pickable=True,
-    #             extruded=True,
-    #         ),
-    #         pdk.Layer(
-    #             'ScatterplotLayer',
-    #             data=dataset_map,
-    #             get_position='[longitude, latitude]',
-    #             get_color='[200, 30, 0, 160]',
-    #             get_radius=200,
-    #         ),
-    #     ],
-    # ))
 
     column1, column2, column3 = st.beta_columns(3)
 
