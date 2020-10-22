@@ -8,11 +8,7 @@ Our tool benefits two user groups. First, it enables hosts to monitor the change
 
 ## Project Goals
 
-TODO: **A clear description of the goals of your project.** Describe the question that you are enabling a user to answer. The question should be compelling and the solution should be focused on helping users achieve their goals.
-
 Our primary goal was to **enable users to monitor the current situation in NYC in terms of Airbnb listing locations and the corresponding Covid-19 density**. For this problem, we used a map style interaction that represents both information as layered on top of each other. Our secondary goal was to illustrate the impact of Covid-19 on the NYC Airbnb market. To do this, we enabled the monthly representation of the Airbnb listings with three supporting charts to reveal changes over time in 2020. Our overarching goal was to help hosts and travelers in making decisions. To support this, we enabled granular controls in the sidebar for users to filter the listings according to their needs.
-
-[link to Google!](http://google.com)
 
 ## Datasets: NYC Airbnb and Covid-19 Data
 
