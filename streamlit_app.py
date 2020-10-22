@@ -96,16 +96,13 @@ if __name__ == "__main__":
     rental_size = ["All", "Studio", "1", "2", "3", "4", "5+"]
 
     # DISPLAY STARTS HERE
-    st.title("To List or Not To List: A COVID-19 Edition")
-    st.markdown('''
-        by Nur Yildirim and Shravya Bhat \n
-        Interactive Data Science Fall 2020 | Assignment 3 | Carnegie Mellon University
-        '''
-                )
+    st.title("NYC Airbnb Listings and COVID-19 Hotspots")
+
 
     # Select City
-    cities = ["New York City"]
-    city = st.sidebar.selectbox("City", cities)
+    # cities = ["New York City"]
+    # city = st.sidebar.selectbox("City", cities)
+    city = "New York City"
 
     # Get unique neighbourhoods
     unique_neighbourhoods = city_neighbourhood_mapping[city]
@@ -148,15 +145,48 @@ if __name__ == "__main__":
     all_filtered_listings.drop_duplicates(subset=['id'], inplace=True, keep='last')
     # Get total number of filtered listings
     total_filtered_listings = len(all_filtered_listings.axes[0])
-    st.write("Number of filtered listings: " + str(total_filtered_listings))
+    # st.write("Number of filtered listings: " + str(total_filtered_listings))
 
     filtered_covid = covid['09']
     if neighbourhood != 'All':
         filtered_covid = covid['09'][(covid['09']['BOROUGH_GROUP'] == neighbourhood)]
 
+
+    # Get median price, no_of reviews
+    median_price = []
+    number_of_listings = []
+    month = []
+    for fl in filtered_listings.keys():
+        fl_df = filtered_listings[fl]
+        month.append(fl)
+        fl_median = fl_df['price'].median()
+
+        if math.isnan(fl_median):
+            fl_median = 0
+        median_price.append(fl_median)
+        # median_price becomes nan when the dataframe is empty
+        fl_listings = len(fl_df.axes[0])
+        number_of_listings.append(fl_listings)
+
+    graphing_dict = {"Month": month, "Median price": median_price, "Number of listings": number_of_listings}
+    graphing_df = pd.DataFrame.from_dict(graphing_dict)
+
+    # Get unique listing IDs from all_filtered_listings
+    listing_id_list = all_filtered_listings['id'].tolist()
+    reviews_city = reviews_dictionary['NYC']
+    df_reviews_year = reviews_city[(reviews_city["year"] == '2020')]
+    df_reviews_year = df_reviews_year[(df_reviews_year["listing_id"].isin(listing_id_list))]
+    reviews_chart = pd.DataFrame(df_reviews_year.groupby(['Month'])['Month'].count())
+    reviews_chart.columns = ['Number of Guests']
+
+
     # Showing map with listings by month
     selected_month = st.select_slider("Months in 2020", ['01', '02', '03', '04', '05', '06', '07', '08', '09'], '09')
-    st.write("Filtered Listings for " + month_number_mapping[selected_month])
+    st.write(
+        "Filtered Listings for " + month_number_mapping[selected_month] + ": " + str(total_filtered_listings) 
+        + " | " + "Median price: " + str(median_price[int(selected_month)-1])
+        + " | " + "Number of Guests: " + str(reviews_chart.axes[0])
+        )
 
     map_data = filtered_listings[selected_month]
     map_data = map_data.dropna()
@@ -178,14 +208,8 @@ if __name__ == "__main__":
                     data=covid_map,
                     pickable=False,
                     opacity=0.8,
-                    cell_size_pixels=50,
+                    cell_size_pixels=100,
                     color_range=[
-                        # [0, 25, 0, 25],
-                        # [0, 85, 0, 85],
-                        # [0, 127, 0, 127],
-                        # [0, 170, 0, 170],
-                        # [0, 190, 0, 190],
-                        # [0, 255, 0, 255],
                         [252, 171, 143, 25],
                         [252, 138, 107, 85],
                         [249, 105, 76, 127],
@@ -194,12 +218,7 @@ if __name__ == "__main__":
                         [187, 22, 26, 255],
                     ],
                     get_position='[longitude, latitude]',
-                    get_weight=2,
-                    # radius=200,
-                    # elevation_scale=4,
-                    # elevation_range=[0, 1000],
-                    # pickable=True,
-                    # extruded=True,
+                    get_weight="COVID_CASE_COUNT",
                 ),
                 pdk.Layer(
                     'ScatterplotLayer',
@@ -210,17 +229,16 @@ if __name__ == "__main__":
                     radius_scale=0.8,
                     # radius_min_pixels=1,
                     # radius_max_pixels=100,
-                    # get_position="coordinates",
                     get_position='[longitude, latitude]',
-                    get_radius=20,
-                    # get_fill_color=[200, 30, 0, 160],
+                    get_radius="number_of_reviews_ltm",
                     get_fill_color=[32, 111, 178, 160],
                 ),
             ],
             tooltip={
                 "html": "<b>name:</b> {name}"
                         "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
-                        " <br/> <b>Room Type:</b> {room_type} "
+                        " <br/> <b>Covid Cases:</b> {COVID_CASE_COUNT} "
+                         " <br/> <b>Room Type:</b> {room_type} "
                         "<br/> <b>Price:</b> {price}"
                         "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
                         "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
@@ -249,8 +267,7 @@ if __name__ == "__main__":
                     # radius_max_pixels=100,
                     # get_position="coordinates",
                     get_position='[longitude, latitude]',
-                    get_radius=20,
-                    # get_fill_color=[200, 30, 0, 160],
+                    get_radius="number_of_reviews_ltm",
                     get_fill_color=[32, 111, 178, 160],
                 ),
             ],
@@ -260,38 +277,19 @@ if __name__ == "__main__":
                         " <br/> <b>Room Type:</b> {room_type} "
                         "<br/> <b>Price:</b> {price}"
                         "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
-                        "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
+                        # "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
                 # "style": {"color": "white"},
             },
         ))
 
     column1, column2, column3 = st.beta_columns(3)
 
-    # Get median price, no_of reviews
-    median_price = []
-    number_of_listings = []
-    month = []
-    for fl in filtered_listings.keys():
-        fl_df = filtered_listings[fl]
-        month.append(fl)
-        fl_median = fl_df['price'].median()
-
-        if math.isnan(fl_median):
-            fl_median = 0
-        median_price.append(fl_median)
-        # median_price becomes nan when the dataframe is empty
-        fl_listings = len(fl_df.axes[0])
-        number_of_listings.append(fl_listings)
-
-    graphing_dict = {"Month": month, "Median price": median_price, "Number of listings": number_of_listings}
-    graphing_df = pd.DataFrame.from_dict(graphing_dict)
-
     # View 2
     view2 = alt.Chart(graphing_df).mark_line().encode(
             x='Month',
             y='Median price'
         ).properties(
-            width=300, height=400
+            width=300, height=200
         ).interactive()
 
     # View 3
@@ -307,7 +305,7 @@ if __name__ == "__main__":
          x='Month',
          y='Number of Guests'
     ).properties(
-         width=300, height=400
+         width=300, height=200
     ).interactive()
 
     # View 4
@@ -315,11 +313,15 @@ if __name__ == "__main__":
         x='Month',
         y='Number of listings'
     ).properties(
-        width=300, height=400
+        width=300, height=200
     ).interactive()
 
-    if st.checkbox('See how the filtered listings have changed over the past year:'):
+    if st.checkbox('See how the filtered listings have changed over 2020:'):
         column1.write(view2)
         column2.write(view3)
         column3.write(view4)
 
+    st.markdown('''
+        by Nur Yildirim and Shravya Bhat | Carnegie Mellon University | Interactive Data Science Fall 2020 | Assignment 3
+        '''
+                )
