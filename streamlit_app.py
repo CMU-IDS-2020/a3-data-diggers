@@ -53,6 +53,16 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
                     '08': pd.read_csv(root_path + '2020/NYC/listings_08.csv'),
                     '09': pd.read_csv(root_path + '2020/NYC/listings_09.csv')}
 
+    MAP_NYC_listings = {'01': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_01.csv",
+                    '02': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_02.csv",
+                    '03': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_03.csv",
+                    '04': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_04.csv",
+                    '05': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_05.csv",
+                    '06': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_06.csv",
+                    '07': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_07.csv",
+                    '08': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_08.csv",
+                    '09': "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_09.csv"}
+
     # Local
     # root_path = "/Users/nur/Documents/Interactive Data Science/a3-data-diggers/data/"
     # root_path = "/Users/shravya/Documents/CMU/Interactive_Data_Science/Assignments/3/Code2/data/"
@@ -90,11 +100,13 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     # Load in the Covid-19 data
     covid_data = {'09': pd.read_csv(root_path + '2020/COVID/covid_data_cleaned_09.csv')}
 
-    return reviews, NYC_listings, covid_data, map_data
+    covid_source = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/COVID/covid_data_cleaned_09.csv"
+
+    return reviews, NYC_listings, covid_data, map_data, MAP_NYC_listings, covid_source
 
 
 if __name__ == "__main__":
-    reviews_dictionary, NYC_listings_dictionary, covid, map_1 = load_data()
+    reviews_dictionary, NYC_listings_dictionary, covid, map_1, MAP_NYC_listings, covid_map = load_data()
 
     month_number_mapping = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May",
                             "06": "June", "07": "July", "08": "August", "09": "September", "10": "October",
@@ -162,7 +174,7 @@ if __name__ == "__main__":
     all_filtered_listings.drop_duplicates(subset=['id'], inplace=True, keep='last')
     # Get total number of filtered listings
     total_filtered_listings = len(all_filtered_listings.axes[0])
-    st.write("Number of listings: " + str(total_filtered_listings))
+    st.write("Number of filtered listings: " + str(total_filtered_listings))
 
     filtered_covid = covid['09']
     if neighbourhood != 'All':
@@ -173,20 +185,124 @@ if __name__ == "__main__":
     # all_filtered_listings.dropna(subset=['latitude', 'longitude'])
     # all_filtered_listings['latitude'] = pd.to_numeric(all_filtered_listings['latitude'])
     # all_filtered_listings['longitude'] = pd.to_numeric(all_filtered_listings['longitude'])
-    month = st.select_slider("Months in 2020", ['01', '02', '03', '04', '05', '06', '07', '08', '09'])
-    dataset_map = filtered_listings[month]
+    selected_month = st.select_slider("Months in 2020", ['01', '02', '03', '04', '05', '06', '07', '08', '09'], '09')
+    dataset_map = filtered_listings[selected_month]
     dataset_map.dropna(subset=['latitude', 'longitude'])
     # dataset_map['latitude'] = pd.to_numeric(dataset_map['latitude'])
     # dataset_map['longitude'] = pd.to_numeric(dataset_map['longitude'])
-    if month == '09':
-        left_column, right_column = st.beta_columns(2)
-        left_column.write("Listings")
-        left_column.map(dataset_map)
-        right_column.write("Current Covid Stats")
-        covid_map_data = filtered_covid
-        right_column.map(covid_map_data)
+
+    left_column, right_column = st.beta_columns(2)
+    left_column.write("Filtered Listings for " + month_number_mapping[selected_month])
+    left_column.map(dataset_map)
+    right_column.write("All Listings for " + month_number_mapping[selected_month])
+    map_data = MAP_NYC_listings[selected_month]
+
+    map_data = filtered_listings[selected_month]
+    map_data = map_data.dropna()
+    if selected_month == '09':
+        right_column.pydeck_chart(pdk.Deck(
+            map_style='mapbox://styles/mapbox/light-v9',
+            initial_view_state=pdk.ViewState(
+                latitude=40.7128,
+                longitude=-74.0060,
+                bearing=0,
+                zoom=11,
+                pitch=0,
+            ),
+            layers=[
+                pdk.Layer(
+                    'ScreenGridLayer',
+                    data=covid_map,
+                    pickable=False,
+                    opacity=0.8,
+                    cell_size_pixels=50,
+                    color_range=[
+                        # [0, 25, 0, 25],
+                        # [0, 85, 0, 85],
+                        # [0, 127, 0, 127],
+                        # [0, 170, 0, 170],
+                        # [0, 190, 0, 190],
+                        # [0, 255, 0, 255],
+                        [252, 171, 143, 25],
+                        [252, 138, 107, 85],
+                        [249, 105, 76, 127],
+                        [239, 70, 52, 170],
+                        [217, 40, 36, 190],
+                        [187, 22, 26, 255],
+                    ],
+                    get_position='[longitude, latitude]',
+                    get_weight=2,
+                    # get_position='[lon, lat]',
+                    # radius=200,
+                    # elevation_scale=4,
+                    # elevation_range=[0, 1000],
+                    # pickable=True,
+                    # extruded=True,
+                ),
+                pdk.Layer(
+                    'ScatterplotLayer',
+                    data=map_data,
+                    pickable=True,
+                    opacity=0.8,
+                    filled=True,
+                    radius_scale=0.8,
+                    # radius_min_pixels=1,
+                    # radius_max_pixels=100,
+                    # get_position="coordinates",
+                    get_position='[longitude, latitude]',
+                    get_radius=20,
+                    # get_fill_color=[200, 30, 0, 160],
+                    get_fill_color=[32, 111, 178, 160],
+                ),
+            ],
+            tooltip={
+                "html": "<b>name:</b> {name}"
+                        "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
+                        " <br/> <b>Room Type:</b> {room_type} "
+                        "<br/> <b>Price:</b> {price}"
+                        "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
+                        "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
+                # "style": {"color": "white"},
+            },
+        ))
     else:
-        st.map(dataset_map)
+        right_column.pydeck_chart(pdk.Deck(
+            map_style='mapbox://styles/mapbox/light-v9',
+            initial_view_state=pdk.ViewState(
+                latitude=40.7128,
+                longitude=-74.0060,
+                bearing=0,
+                zoom=11,
+                pitch=0,
+            ),
+            layers=[
+                pdk.Layer(
+                    'ScatterplotLayer',
+                    data=map_data,
+                    pickable=True,
+                    opacity=0.8,
+                    filled=True,
+                    radius_scale=0.8,
+                    # radius_min_pixels=1,
+                    # radius_max_pixels=100,
+                    # get_position="coordinates",
+                    get_position='[longitude, latitude]',
+                    get_radius=20,
+                    # get_fill_color=[200, 30, 0, 160],
+                    get_fill_color=[32, 111, 178, 160],
+                ),
+            ],
+            tooltip={
+                "html": "<b>name:</b> {name}"
+                        "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
+                        " <br/> <b>Room Type:</b> {room_type} "
+                        "<br/> <b>Price:</b> {price}"
+                        "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
+                        "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
+                # "style": {"color": "white"},
+            },
+        ))
+
 
     # st.pydeck_chart(pdk.Deck(
     #     map_style='mapbox://styles/mapbox/light-v9',
@@ -269,77 +385,3 @@ if __name__ == "__main__":
         column2.write(view3)
         column3.write(view4)
 
-map_data = (
-    # "https://raw.githubusercontent.com/uber-common/"
-    # "deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"
-    # "https://github.com/CMU-IDS-2020/a3-data-diggers/blob/master/data/2020/NYC/listings_09.csv"
-    # 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
-    "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_09.csv"
-)
-
-
-st.pydeck_chart(pdk.Deck(
-    map_style='mapbox://styles/mapbox/light-v9',
-    initial_view_state=pdk.ViewState(
-        latitude=40.7128,
-        longitude=-74.0060,
-        bearing = 0,
-        zoom=11,
-        pitch=0,
-    ),
-    layers=[
-        pdk.Layer(
-            'ScreenGridLayer',
-            data=map_data,
-            pickable = False,
-            opacity = 0.8,
-            cell_size_pixels=50,
-            color_range=[
-                # [0, 25, 0, 25],
-                # [0, 85, 0, 85],
-                # [0, 127, 0, 127],
-                # [0, 170, 0, 170],
-                # [0, 190, 0, 190],
-                # [0, 255, 0, 255],
-                [252, 171, 143, 25],
-                [252, 138, 107, 85],
-                [249, 105, 76, 127],
-                [239, 70, 52, 170],
-                [217, 40, 36, 190],
-                [187, 22, 26, 255],
-            ],
-            get_position='[longitude, latitude]',
-            get_weight=2,
-            # get_position='[lon, lat]',
-            # radius=200,
-            # elevation_scale=4,
-            # elevation_range=[0, 1000],
-            # pickable=True,
-            # extruded=True,
-        ),
-        pdk.Layer(
-            'ScatterplotLayer',
-            data=map_data,
-            pickable = True,
-            opacity = 0.8,
-            filled=True,
-            radius_scale=0.8,
-            # radius_min_pixels=1,
-            # radius_max_pixels=100,
-            # get_position="coordinates",
-            get_position='[longitude, latitude]',
-            get_radius=20,
-            # get_fill_color=[200, 30, 0, 160],
-            get_fill_color=[32, 111, 178, 160],
-        ),
-    ],
-    tooltip={
-        "html": "<b>name:</b> {name}"
-        "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
-        " <br/> <b>Room Type:</b> {room_type} "
-        "<br/> <b>Price:</b> {price}"
-        "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
-        "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
-        # "style": {"color": "white"},
-    },
-))
