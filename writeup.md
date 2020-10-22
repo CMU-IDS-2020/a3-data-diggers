@@ -1,6 +1,6 @@
 # NYC Airbnb Listings and COVID-19 Hotspots
 
-![A screenshot of your application. Could be a GIF.](screenshot_NYC.png)
+![A screenshot of our tool.](screenshot_NYC.png)
 
 Covid-19 has impacted the hospitality industry significantly. Airbnb is one of the most affected businesses with the travel restrictions across countries and regions. With this project, we aimed to create a tool that allows users to explore the impact of Covid-19 on the Airbnb market in New York City, which was a major hotspot for coronavirus in the US. Using this interactive tool, users can inspect the current Airbnb listings and monitor the density of Covid-19 cases in corresponding neighborhoods.
 
@@ -12,7 +12,7 @@ Our primary goal was to **enable users to monitor the current situation in NYC i
 
 ## Datasets: NYC Airbnb and Covid-19 Data
 
-We are using the data from [InsideAirbnb.com] (http://insideairbnb.com/get-the-data.html) for the Airbnb listings and [the NYC Health data] (https://github.com/nychealth/coronavirus-data) for the Covid-19 information. The data for Airbnb is updated monthly and has information about the name, location, zip code, room type, price, number of reviews, and number of bedrooms (rental size). The Covid-19 data has zip code and the number of covid cases information, which we used to link both datasets.
+We are using the data from [InsideAirbnb.com](http://insideairbnb.com/get-the-data.html) for the Airbnb listings and [the NYC Health data](https://github.com/nychealth/coronavirus-data) for the Covid-19 information. The data for Airbnb is updated monthly and has information about the name, location, zip code, room type, price, number of reviews, and number of bedrooms (rental size). The Covid-19 data has zip code and the number of covid cases information, which we used to link both datasets.
 
 One shortcoming to note is that we are using the number of reviews as a proxy for demand. However, this number might not reflect the actual occupancy as not every user leaves a review after their stay, especially after Covid-19. This is a common limitation of working with a free dataset that was scraped from the Airbnb website.
 
@@ -26,9 +26,9 @@ For the overall mapping, we chose contrasting colors to distinguish the scattere
 
 ## Interaction Scenario and Insights
 
-The users can zoom in on the map to explore the Airbnb listings that are still attracting travelers and the current density of Covid-19 cases in those particular regions. They can filter these listings based on their needs and preferences. For example, a host might filter all the private room listings in his borough to monitor the number of listings, the median price, and the demand (size of listings based on the number of reviews). Considering the supply, demand, and the Covid-19 situation, they might decide to price differently or not to list at Airbnb (as [most hosts] (https://www.cnbc.com/2020/03/25/airbnb-hosts-turn-to-long-term-rentals-competitors-due-to-coronavirus.html) are switching to longer term rental platforms such as Zillow and Craigslist).
+The users can zoom in on the map to explore the Airbnb listings that are still attracting travelers and the current density of Covid-19 cases in those particular regions. They can filter these listings based on their needs and preferences. For example, a host might filter all the private room listings in his borough to monitor the number of listings, the median price, and the demand (size of listings based on the number of reviews). Considering the supply, demand, and the Covid-19 situation, they might decide to price differently or not to list at Airbnb (as [most hosts](https://www.cnbc.com/2020/03/25/airbnb-hosts-turn-to-long-term-rentals-competitors-due-to-coronavirus.html) are switching to longer term rental platforms such as Zillow and Craigslist).
 
-Travelers looking to rent a place can compare boroughs and explore the localized price changes for a similar type of housing across neighborhoods. For example, they can look at the yearly trend charts at the bottom to discover that Manhattan and Brooklyn have seen some decrease in median prices, while in contrast, the prices have increased in Staten Island. The situation in NYC is [similar to other US cities] (https://www.airdna.co/blog/coronavirus-causes-boom-non-urban-strs) in the sense that rural regions are becoming more popular where urban areas are less preferred due to dense population. For Staten Island, the line charts display how the prices have increased with the increased demand and decreased number of listings after April 2020.
+Travelers looking to rent a place can compare boroughs and explore the localized price changes for a similar type of housing across neighborhoods. For example, they can look at the yearly trend charts at the bottom to discover that Manhattan and Brooklyn have seen some decrease in median prices, while in contrast, the prices have increased in Staten Island. The situation in NYC is [similar to other US cities](https://www.airdna.co/blog/coronavirus-causes-boom-non-urban-strs) in the sense that rural regions are becoming more popular where urban areas are less preferred due to dense population. For Staten Island, the line charts display how the prices have increased with the increased demand and decreased number of listings after April 2020.
 
 ## Development
 
