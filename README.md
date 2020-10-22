@@ -1,6 +1,6 @@
 # CMU Interactive Data Science Assigment 3
 
-* **Team members**: nyildiri and shravyab
+* **Team members**: Nur Yildirim (nyildiri@andrew.cmu.edu) and Shravya Bhat (shravyab@andrew.cmu.edu)
 * **Online URL**: https://share.streamlit.io/cmu-ids-2020/a3-data-diggers
 
 ## Instructions
