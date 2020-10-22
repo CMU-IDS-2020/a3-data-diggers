@@ -1,6 +1,6 @@
 # NYC Airbnb Listings and COVID-19 Hotspots
 
-![A screenshot of your application. Could be a GIF.](screenshot.png)
+![A screenshot of your application. Could be a GIF.](screenshot_NYC_Airbnb_Covid19.png)
 
 Covid-19 has impacted the hospitality industry significantly. Airbnb is one of the most affected businesses with the travel restrictions across countries and regions. With this project, we aimed to create a tool that allows users to explore the impact of Covid-19 on the Airbnb market in New York City, which was a major hotspot for coronavirus in the US. Using this interactive tool, users can inspect the current Airbnb listings and monitor the density of Covid-19 cases in corresponding neighborhoods.
 
