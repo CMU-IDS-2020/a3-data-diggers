@@ -38,9 +38,6 @@ def get_coordinates(lat, lon):
     return coordinates_list
 
 
-
-
-
 @st.cache  # add caching so we load the data only once
 def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     # Server
@@ -70,6 +67,8 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     #                 '08': pd.read_csv(root_path + '2020/NYC/listings_08.csv'),
     #                 '09': pd.read_csv(root_path + '2020/NYC/listings_09.csv')}
 
+    map_data = "https://raw.githubusercontent.com/CMU-IDS-2020/a3-data-diggers/master/data/2020/NYC/listings_09.csv"
+
     # Calculating + appending month and year to the reviews dataframe
     for key in reviews.keys():
         rdf = reviews[key]
@@ -91,11 +90,11 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     # Load in the Covid-19 data
     covid_data = {'09': pd.read_csv(root_path + '2020/COVID/covid_data_cleaned_09.csv')}
 
-    return reviews, NYC_listings, covid_data
+    return reviews, NYC_listings, covid_data, map_data
 
 
 if __name__ == "__main__":
-    reviews_dictionary, NYC_listings_dictionary, covid = load_data()
+    reviews_dictionary, NYC_listings_dictionary, covid, map_1 = load_data()
 
     month_number_mapping = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May",
                             "06": "June", "07": "July", "08": "August", "09": "September", "10": "October",
