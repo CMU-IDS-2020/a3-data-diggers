@@ -92,6 +92,14 @@ st.pydeck_chart(pdk.Deck(
             get_fill_color=[32, 111, 178, 160],
         ),
     ],
+    tooltip={
+            "html": "<b>name:</b> {name}"
+            "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
+            " <br/> <b>Room Type:</b> {room_type} "
+            "<br/> <b>Price:</b> {price}"
+            "<br/> <b>Number of reviews:</b> {number_of_reviews_l30d}",
+            # "style": {"color": "white"},
+        },
 ))
 
 # # Define a layer to display on a map

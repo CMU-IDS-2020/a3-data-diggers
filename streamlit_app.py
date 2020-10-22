@@ -73,7 +73,7 @@ def load_data():  # Load the airbnb data acquired from InsideAirbnb.com
     # Calculating + appending month and year to the reviews dataframe
     for key in reviews.keys():
         rdf = reviews[key]
-        rdf["month"] = rdf.apply(lambda row: get_month(row["date"]), axis=1)
+        rdf["Month"] = rdf.apply(lambda row: get_month(row["date"]), axis=1)
         rdf["year"] = rdf.apply(lambda row: get_year(row["date"]), axis=1)
         reviews[key] = rdf
 
@@ -174,8 +174,7 @@ if __name__ == "__main__":
     # all_filtered_listings.dropna(subset=['latitude', 'longitude'])
     # all_filtered_listings['latitude'] = pd.to_numeric(all_filtered_listings['latitude'])
     # all_filtered_listings['longitude'] = pd.to_numeric(all_filtered_listings['longitude'])
-    month = st.selectbox("Please select the month for "
-                         "which you want to compare data", ['01', '02', '03', '04', '05', '06', '07', '08', '09'])
+    month = st.select_slider("Months in 2020", ['01', '02', '03', '04', '05', '06', '07', '08', '09'])
     dataset_map = filtered_listings[month]
     dataset_map.dropna(subset=['latitude', 'longitude'])
     # dataset_map['latitude'] = pd.to_numeric(dataset_map['latitude'])
@@ -231,13 +230,13 @@ if __name__ == "__main__":
         fl_listings = len(fl_df.axes[0])
         number_of_listings.append(fl_listings)
 
-    graphing_dict = {"month": month, "median price": median_price, "number of listings": number_of_listings}
+    graphing_dict = {"Month": month, "Median price": median_price, "Number of listings": number_of_listings}
     graphing_df = pd.DataFrame.from_dict(graphing_dict)
 
     # View 2
     view2 = alt.Chart(graphing_df).mark_line().encode(
-            x='month',
-            y='median price'
+            x='Month',
+            y='Median price'
         ).properties(
             width=300, height=400
         ).interactive()
@@ -248,11 +247,11 @@ if __name__ == "__main__":
     reviews_city = reviews_dictionary['NYC']
     df_reviews_year = reviews_city[(reviews_city["year"] == '2020')]
     df_reviews_year = df_reviews_year[(df_reviews_year["listing_id"].isin(listing_id_list))]
-    reviews_chart = pd.DataFrame(df_reviews_year.groupby(['month'])['month'].count())
+    reviews_chart = pd.DataFrame(df_reviews_year.groupby(['Month'])['Month'].count())
     reviews_chart.columns = ['Number of Guests']
     reviews_chart.reset_index(inplace=True)
     view3 = alt.Chart(reviews_chart).mark_line().encode(
-         x='month',
+         x='Month',
          y='Number of Guests'
     ).properties(
          width=300, height=400
@@ -260,8 +259,8 @@ if __name__ == "__main__":
 
     # View 4
     view4 = alt.Chart(graphing_df).mark_line().encode(
-        x='month',
-        y='number of listings'
+        x='Month',
+        y='Number of listings'
     ).properties(
         width=300, height=400
     ).interactive()
@@ -283,8 +282,8 @@ map_data = (
 st.pydeck_chart(pdk.Deck(
     map_style='mapbox://styles/mapbox/light-v9',
     initial_view_state=pdk.ViewState(
-        latitude=37.7749295,
-        longitude=-122.4,
+        latitude=40.7128,
+        longitude=-74.0060,
         bearing = 0,
         zoom=11,
         pitch=0,
@@ -335,4 +334,13 @@ st.pydeck_chart(pdk.Deck(
             get_fill_color=[32, 111, 178, 160],
         ),
     ],
+    tooltip={
+        "html": "<b>name:</b> {name}"
+        "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
+        " <br/> <b>Room Type:</b> {room_type} "
+        "<br/> <b>Price:</b> {price}"
+        "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
+        "<br/> <b>Number of reviews last month:</b> {number_of_reviews_l30d}",
+        # "style": {"color": "white"},
+    },
 ))
