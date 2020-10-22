@@ -239,7 +239,7 @@ if __name__ == "__main__":
                 ),
             ],
             tooltip={
-                "html": "<b>name:</b> {name}"
+                "html": "<b>Name:</b> {name}"
                         "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
                          " <br/> <b>Room Type:</b> {room_type} "
                         "<br/> <b>Price:</b> {price}"
@@ -275,7 +275,7 @@ if __name__ == "__main__":
                 ),
             ],
             tooltip={
-                "html": "<b>name:</b> {name}"
+                "html": "<b>Name:</b> {name}"
                         "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
                         " <br/> <b>Room Type:</b> {room_type} "
                         "<br/> <b>Price:</b> {price}"
