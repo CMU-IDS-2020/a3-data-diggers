@@ -118,8 +118,8 @@ if __name__ == "__main__":
         size_rental_internal = 0 if size_rental == 'Studio' else int(size_rental.replace('+', ''))
 
     # Select price range
-    min_price = st.sidebar.slider("Minimum Price", 0, 10000, 0, 500, format="$%d")
-    max_price = st.sidebar.slider("Maximum Price", 0, 10000, 10000, 500, format="$%d")
+    min_price = st.sidebar.slider("Minimum Price", 0, 10000, 0, 50, format="$%d")
+    max_price = st.sidebar.slider("Maximum Price", 0, 10000, 10000, 50, format="$%d")
 
     # Get the filtered dataframe based on the above criteria
     listings_dict = city_listings_mapping[city]
@@ -181,11 +181,15 @@ if __name__ == "__main__":
 
 
     # Showing map with listings by month
+    st.write('''
+    Examining how the Airbnb market was impacted by Covid-19.
+    Using the sidebar controls, you can view filtered listings and explore price and occupancy trends.
+    ''')
+
     selected_month = st.select_slider("Months in 2020", ['01', '02', '03', '04', '05', '06', '07', '08', '09'], '09')
     st.write(
-        "Filtered Listings for " + month_number_mapping[selected_month] + ": " + str(total_filtered_listings) 
+        "Number of Listings: " + str(total_filtered_listings) 
         + " | " + "Median price: " + str(median_price[int(selected_month)-1])
-        + " | " + "Number of Guests: " + str(reviews_chart.axes[0])
         )
 
     map_data = filtered_listings[selected_month]
@@ -237,7 +241,6 @@ if __name__ == "__main__":
             tooltip={
                 "html": "<b>name:</b> {name}"
                         "<br/> <b>Neighbourhood:</b> {neighbourhood_cleansed}"
-                        " <br/> <b>Covid Cases:</b> {COVID_CASE_COUNT} "
                          " <br/> <b>Room Type:</b> {room_type} "
                         "<br/> <b>Price:</b> {price}"
                         "<br/> <b>Number of reviews last 3 months:</b> {number_of_reviews_ltm}"
